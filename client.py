@@ -13,12 +13,13 @@ while True:
         data, addr = client.recvfrom(1024)
         if tostop:
             return
-        if data!= None:
-            (magic_cookie, massage_type, server_port) = struct.unpack('IbH',data)
-            if magic_cookie=="0xabcddcba" and massage_type=="0x2":
-                print("Received offer from %s, attempting to connect..." %addr[0])
-                addrs.append(addr)
-                return
+        if data== None:
+            return
+        (magic_cookie, massage_type, server_port) = struct.unpack('IbH',data)
+        if magic_cookie=="0xabcddcba" and massage_type=="0x2":
+            print("Received offer from %s, attempting to connect..." %addr[0])
+            addrs.append(addr)
+            return 
         scheduler.enter(0, 1, get_offers, (sc,s,False,data))
 
     scheduler = sched.scheduler(time.time, time.sleep)

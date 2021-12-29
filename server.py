@@ -1,4 +1,4 @@
-import socket, threading, random, time, msvcrt, select, sys, concurrent.futures,struct
+import socket, threading, random, time, select, sys, concurrent.futures,struct
  
 #-------------------------------server---------------------------------------------------    
 class ClientThread(threading.Thread):
@@ -65,30 +65,33 @@ class ClientThread(threading.Thread):
                     print("Game over, sending out offer requests...")
                     break
 #-------------------------------udp-part---------------------------------------------
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-s.bind(("",2043)) 
 hostname = socket.gethostname()
-server_udp_ip = socket.gethostbyname(hostname)
+# server_udp_ip = socket.gethostbyname(hostname)
+server_udp_ip = '172.1.0.43'
 
 start_message = "This is an offer announcement join to " + server_udp_ip
 print("Server started, listening on IP address " + server_udp_ip)
-
+  
 def server_broadcast():
-    while True:      
-        s.sendto(struct.pack('IbH',start_message).encode(), ('<broadcast>', 13117))
+    magic_cookie = 0xabcddcba
+    massage_type = 0x2
+    server_port = 2043 
+    while True:
+        s.sendto(struct.pack('IbH',magic_cookie,massage_type,server_port), ('255.255.255.255', 13117))
         time.sleep(1)
 
 
 threading.Thread(target=server_broadcast).start()
 
 #-----------------------------tcp-part------------------------------------------------
-LOCALHOST = "127.0.0.1" 
+LOCALHOST = '172.1.0.43'
 PORT = 2043
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server.bind((LOCALHOST, PORT))
+#server.bind((LOCALHOST, PORT))
 
 def creating_game():
     math_problems = {"1+1":"2", "4+5":"9", "6+3":"9", "5*1":"5", "2*2+2":"6", "7+2*1":"9", "2+2":"4", "8+0":"8", "1+6":"7", "5+2":"7"}
